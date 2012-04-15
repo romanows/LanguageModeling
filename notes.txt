@@ -1,0 +1,80 @@
+Some notes about this project.
+
+== SRILM Null Backoffs ==
+In my example ARPA language model file, created by SRILM with Kneser-Ney 
+discounting and mostly default params, there are some parameters without
+backoff factors where they seemingly should have backoff factors (BF).  
+
+For example, "<s> egyptian" doesn't have a BF even though our sentences 
+must be delimited by "<s> * </s>", so there _should_ be another word 
+after "egyptian".  Apparently, SRILM did some kind of pruning by default,
+probably by removing all ngrams with only 1 count.
+
+In any case, we read the lack of a BF as -Infinity and use it as indicator 
+to backoff further.  This is a bit inefficient, as lower-order ngrams 
+have storage space allocated for backoff probabilities.  
+
+Possible solutions:
+* Create two prob/backoff classes, one that store BF and the other that 
+   just always returns -Infinity and doesn't store anything.  This is 
+   the best solution, but I was seeing an ugly-looking class hierarchy
+   and was having trouble naming things.
+* Refactor NGramProbability.java to include a getBackoff() method that 
+   always returns -Infinity.  This is essentially the same idea as 
+   above, but the class hierarchy is a bit different.  However, we 
+   lose somewhat the type safety that separates the high-order probs 
+   from the lower-order probs.  I like keeping this because working 
+   with the collections can be a bit confusing. 
+
+
+== Multiple NGram Implementations ==
+Use AbstractNGram.factory() for all your ngram needs.  It will select the
+appropriate implementation of NGram to use.  The different 
+implementations save on space and somewhat on time/complexity by 
+representing the ngram word sequences in different ways.  
+
+"Bigram" has two Strings, while "NGram" has an internal String[].  Bigram 
+saves memory compared to an order-2 NGram.  Some of the operations are 
+simpler and should be faster, as you don't need to worry about iterating 
+and terminating the iteration through an array.
+
+However, all of these are less flexible in terms of backing-off and 
+similar things.  Currently, one incurs an object creation penalty when 
+one calls backoff() or history().  I'm okay with this trade-off; the 
+number 1 priority was to minimize memory consumption.  A secondary 
+property was to minimize mutability.  I think there are probably ways of 
+doing fairly smart backoff/history "views", reusing objects where 
+appropriate.
+
+
+== Vocabulary String Pool ==
+As NGrams tend to share the same words, and large models can overflow 
+available memory.  To minimize the size of the model in memory, 
+we create NGrams that reference a "canonical" word string stored in 
+a Vocabulary string pool.  This means that all instances of the word
+"foo" in the model are just references to one single String object "foo".
+
+One can also do this with a bit less work by calling String.intern().
+Here, the JRE will add the string to its own internal string pool.  This
+isn't used because we have no way to "free" strings when we're done using
+them.
+  
+
+== Tokenizer ==
+Man, why would you implement a tokenizer when there are decent tokenizers 
+and every application requires its own tokenizer (String.split())???
+
+I did this essentially for fun, and because I wanted a tokenizer that 
+could handle unicode whitespace.  However, I got fed up and ended up 
+using the BufferedWriter's "readLine", which I believe doesn't make use 
+of unicode line breaking characters.  This is a bug.
+
+Also, I do like the Java Tokenizer's idea of outputting symbols when 
+certain events occur like whitespace, newlines, eof, etc.  I think this 
+is probably a feature this should have.
+
+
+== ARPA Model Loading ==
+This class is based on a refactored version of an ARPA model loader from 
+Sphinx 4.  I extensively refactored the loader in Sphinx 4, and then 
+refactored it again when implementing it for this project. 

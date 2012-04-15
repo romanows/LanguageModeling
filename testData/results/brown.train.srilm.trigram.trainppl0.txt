@@ -1,0 +1,2 @@
+file /home/romanows/eclipse/workspace-languagemodel/LanguageModeling/testData/trainingText/brown.sentences.nltk.train.txt: 49340 sentences, 1.00016e+06 words, 0 OOVs
+0 zeroprobs, logprob= -2.03795e+06 ppl= 87.4618 ppl1= 109.047

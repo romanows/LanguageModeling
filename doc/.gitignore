@@ -1,0 +1,17 @@
+# Latex intermediate and target files
+*.aux
+*.bbl
+*.blg
+*.d
+*.dvi
+*.log
+*.pdf
+
+# Beamer intermediate files
+*.snm
+*.toc
+*.out
+*.nav
+
+# Editor temporary files
+*.swp
