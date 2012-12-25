@@ -135,7 +135,7 @@ public class ARPAModelLoader {
 
     	Map<Integer, Integer> ngramLenMap = new HashMap<Integer, Integer>();
 
-        BufferedReader br;
+        BufferedReader br = null;
 		try {
 			br = new BufferedReader(new FileReader(modelFile));
 
@@ -268,11 +268,15 @@ public class ARPAModelLoader {
 				throw new IOException("Corrupt Language Model " + modelFile.getPath() + " at line " + lineNumber + ": reached end of file without reading all required information");
 	        }
 
-	        br.close();
-
 	        backoffLanguageModel = new BackoffLanguageModel(10.0, highOrderNGrams, lowerOrderToNGrams);
 		} catch (IOException e) {
 			throw new IllegalArgumentException(e);
+		} finally {
+			try {
+				br.close();
+			} catch (IOException e) {
+				throw new IllegalArgumentException(e);
+			}
 		}
 	}
 
