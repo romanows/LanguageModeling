@@ -63,6 +63,7 @@ public class TestKneserNeyModFixModel {
 				referenceSentenceList.add(Arrays.asList(line.split("\\s+")));
 			}
 		}
+		br.close();
 		return referenceSentenceList;
 	}
 
