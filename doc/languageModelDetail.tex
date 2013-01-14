@@ -208,7 +208,6 @@ Each of these conditional probability distributions (i.e., model parameters) may
 \section{The Problem of Sparsity}
 The \ngram assumption helps mitigate sparsity problems, but there are still many word sequences that are seen rarely or not at all in training data.
 The worst case occurs when there is a sequence of words encountered during testing that was not encountered during training.
-The maximum likelihood estimate of this sequence will be $0$, and it will have the consequences detailed below.
 
 As an example, consider a bigram model is trained on the Brown corpus.
 Suppose the model is used to calculate the probability of the sentence: ``the quick brown fox''.
